@@ -132,46 +132,24 @@ form {
     margin-bottom: 3rem;
 }
 
-@mixin slider-track-gradient($gradient) {
-    background: $gradient;
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
+.slider-control {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
 
-.slider {
-    &.hue-slider {
-        $hue-gradient: linear-gradient(to right, #ff0000 0%, #ff9900 16%, #ffff00 33%, #00ff00 50%, #00ffff 66%, #0000ff 83%, #ff00ff 100%);
-        @include slider-track-gradient($hue-gradient);
-
-        &::-webkit-slider-runnable-track {
-            @include slider-track-gradient($hue-gradient);
-        }
-
-        &::-moz-range-track {
-            @include slider-track-gradient($hue-gradient);
-        }
-
-        &::-ms-fill-lower,
-        &::-ms-fill-upper {
-            @include slider-track-gradient($hue-gradient);
-        }
+    .form-label {
+        flex: 0 0 5rem;
+        margin-bottom: 0;
     }
 
-    &.brightness-slider {
-        $brightness-gradient: linear-gradient(to right, #000000, #ffffff);
-        @include slider-track-gradient($brightness-gradient);
+    input[type="range"] {
+        flex: 1 1 auto;
+    }
 
-        &::-webkit-slider-runnable-track {
-            @include slider-track-gradient($brightness-gradient);
-        }
-
-        &::-moz-range-track {
-            @include slider-track-gradient($brightness-gradient);
-        }
-
-        &::-ms-fill-lower,
-        &::-ms-fill-upper {
-            @include slider-track-gradient($brightness-gradient);
-        }
+    .slider-value {
+        width: 3rem;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
     }
 }
