@@ -1,3 +1,23 @@
+mixin colorControl(id, binding)
+    - var hueId = id + '-hue'
+    - var brightnessId = id + '-brightness'
+    .form-group
+        .col-4
+            label.form-label(for=id)
+                block
+        .col-8
+            input.form-input(type='color', id=id, 'rv-value'=binding)
+    .form-group
+        .col-4
+            label.form-label(for=hueId) ${{ index.hue }}$
+        .col-8
+            input.col-12.slider.hue-slider(type='range', min='0', max='360', value='0', id=hueId, 'data-color-input'=id)
+    .form-group
+        .col-4
+            label.form-label(for=brightnessId) ${{ index.brightness }}$
+        .col-8
+            input.col-12.slider.brightness-slider(type='range', min='0', max='100', value='100', id=brightnessId, 'data-color-input'=id)
+
 .contenttab#colorconfig
     h2 ${{ index.colorconfig.title }}$
     div ${{ index.colorconfig.description }}$
@@ -11,44 +31,26 @@
             .column.col-6.col-sm-12.mt-2
                 .h6 ${{ index.color_day }}$
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='hourcolor') ${{ index.hour }}$ 
-                    .col-8
-                        input.form-input(type='color', id='hourcolor' rv-value='config.hourColor')
-                
-                .form-group 
-                    .col-4
-                        label.form-label(for='minutecolor') ${{ index.minute }}$ 
-                    .col-8
-                        input.form-input(type='color', id='minutecolor' rv-value='config.minuteColor')
-                
-                .form-group
-                    .col-4
-                        label.form-label(for='secondcolor') ${{ index.second }}$ 
-                    .col-8
-                        input.form-input(type='color', id='secondcolor' rv-value='config.secondColor')
+                +colorControl('hourcolor', 'config.hourColor')
+                    | ${{ index.hour }}$
+
+                +colorControl('minutecolor', 'config.minuteColor')
+                    | ${{ index.minute }}$
+
+                +colorControl('secondcolor', 'config.secondColor')
+                    | ${{ index.second }}$
 
             .column.col-6.col-sm-12.mt-2
                 .h6 ${{ index.color_night }}$
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='hourcolordimmed') ${{ index.hour }}$ 
-                    .col-8
-                        input.form-input(type='color', id='hourcolordimmed' rv-value='config.hourColorDimmed')
-                
-                .form-group 
-                    .col-4
-                        label.form-label(for='minutecolordimmed') ${{ index.minute }}$ 
-                    .col-8
-                        input.form-input(type='color', id='minutecolordimmed' rv-value='config.minuteColorDimmed')
-                
-                .form-group
-                    .col-4
-                        label.form-label(for='secondcolordimmed') ${{ index.second }}$ 
-                    .col-8
-                        input.form-input(type='color', id='secondcolordimmed' rv-value='config.secondColorDimmed')
+                +colorControl('hourcolordimmed', 'config.hourColorDimmed')
+                    | ${{ index.hour }}$
+
+                +colorControl('minutecolordimmed', 'config.minuteColorDimmed')
+                    | ${{ index.minute }}$
+
+                +colorControl('secondcolordimmed', 'config.secondColorDimmed')
+                    | ${{ index.second }}$
 
     .divider
 
@@ -69,44 +71,26 @@
             .column.col-6.col-xs-12.mt-2
                 .h6 ${{ index.color_day }}$
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='weekdaycolor') ${{ index.weekday }}$ 
-                    .col-8
-                        input.form-input(type='color', id='weekdaycolor' rv-value='config.weekdayColor')
-                
-                .form-group 
-                    .col-4
-                        label.form-label(for='daycolor') ${{ index.date }}$ 
-                    .col-8
-                        input.form-input(type='color', id='daycolor' rv-value='config.dayColor')
-                
-                .form-group
-                    .col-4
-                        label.form-label(for='monthcolor') ${{ index.month }}$ 
-                    .col-8
-                        input.form-input(type='color', id='monthcolor' rv-value='config.monthColor')
+                +colorControl('weekdaycolor', 'config.weekdayColor')
+                    | ${{ index.weekday }}$
+
+                +colorControl('daycolor', 'config.dayColor')
+                    | ${{ index.date }}$
+
+                +colorControl('monthcolor', 'config.monthColor')
+                    | ${{ index.month }}$
 
             .column.col-6.col-xs-12.mt-2
                 .h6 ${{ index.color_night }}$
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='weekdaycolordimmed') ${{ index.weekday }}$ 
-                    .col-8
-                        input.form-input(type='color', id='weekdaycolordimmed' rv-value='config.weekdayColorDimmed')
-                
-                .form-group 
-                    .col-4
-                        label.form-label(for='daycolordimmed') ${{ index.date }}$ 
-                    .col-8
-                        input.form-input(type='color', id='daycolordimmed' rv-value='config.dayColorDimmed')
-                
-                .form-group
-                    .col-4
-                        label.form-label(for='monthcolordimmed') ${{ index.month }}$ 
-                    .col-8
-                        input.form-input(type='color', id='monthcolordimmed' rv-value='config.monthColorDimmed')
+                +colorControl('weekdaycolordimmed', 'config.weekdayColorDimmed')
+                    | ${{ index.weekday }}$
+
+                +colorControl('daycolordimmed', 'config.dayColorDimmed')
+                    | ${{ index.date }}$
+
+                +colorControl('monthcolordimmed', 'config.monthColorDimmed')
+                    | ${{ index.month }}$
 
     .divider
 
@@ -120,19 +104,13 @@
 
             .column.col-6.bglightsettings(rv-if='config.bgLight')
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='bgcolor') ${{ index.day }}$ 
-                    .col-8
-                        input.form-input(type='color', id='bgcolor' rv-value='config.bgColor')
-                
+                +colorControl('bgcolor', 'config.bgColor')
+                    | ${{ index.day }}$
+
             .column.col-6.bglightsettings(rv-if='config.bgLight')
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='bgcolordimmed') ${{ index.night }}$ 
-                    .col-8
-                        input.form-input(type='color', id='bgcolordimmed' rv-value='config.bgColorDimmed')
+                +colorControl('bgcolordimmed', 'config.bgColorDimmed')
+                    | ${{ index.night }}$
     
     .divider
 
@@ -146,19 +124,13 @@
 
             .column.col-6.bglightsettings(rv-if='config.hourDot')
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='hourdotcolor') ${{ index.day }}$ 
-                    .col-8
-                        input.form-input(type='color', id='hourdotcolor' rv-value='config.hourDotColor')
-                
+                +colorControl('hourdotcolor', 'config.hourDotColor')
+                    | ${{ index.day }}$
+
             .column.col-6.bglightsettings(rv-if='config.hourDot')
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='hourdotcolordimmed') ${{ index.night }}$ 
-                    .col-8
-                        input.form-input(type='color', id='hourdotcolordimmed' rv-value='config.hourDotColorDimmed')
+                +colorControl('hourdotcolordimmed', 'config.hourDotColorDimmed')
+                    | ${{ index.night }}$
     
     .divider
     
@@ -172,19 +144,13 @@
 
             .column.col-6.bglightsettings(rv-if='config.hourQuarter')
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='hourquartercolor') ${{ index.day }}$ 
-                    .col-8
-                        input.form-input(type='color', id='hourquartercolor' rv-value='config.hourQuarterColor')
-                
+                +colorControl('hourquartercolor', 'config.hourQuarterColor')
+                    | ${{ index.day }}$
+
             .column.col-6.bglightsettings(rv-if='config.hourQuarter')
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='hourquartercolordimmed') ${{ index.night }}$ 
-                    .col-8
-                        input.form-input(type='color', id='hourquartercolordimmed' rv-value='config.hourQuarterColorDimmed')
+                +colorControl('hourquartercolordimmed', 'config.hourQuarterColorDimmed')
+                    | ${{ index.night }}$
 
     .divider
     
@@ -198,19 +164,13 @@
 
             .column.col-6.bglightsettings(rv-if='config.hourSegment')
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='hoursegmentcolor') ${{ index.day }}$ 
-                    .col-8
-                        input.form-input(type='color', id='hoursegmentcolor' rv-value='config.hourSegmentColor')
-                
+                +colorControl('hoursegmentcolor', 'config.hourSegmentColor')
+                    | ${{ index.day }}$
+
             .column.col-6.bglightsettings(rv-if='config.hourSegment')
 
-                .form-group 
-                    .col-4
-                        label.form-label(for='hoursegmentcolordimmed') ${{ index.night }}$ 
-                    .col-8
-                        input.form-input(type='color', id='hoursegmentcolordimmed' rv-value='config.hourSegmentColorDimmed')
+                +colorControl('hoursegmentcolordimmed', 'config.hourSegmentColorDimmed')
+                    | ${{ index.night }}$
     
     .divider
     
