@@ -25,6 +25,8 @@
     "time": "Time",
     "day": "Day",
     "night": "Night",
+    "hue": "Hue",
+    "brightness": "Brightness",
     "restart_required": "Requires restart",
     "colorconfig": {
         "title": "Color configuration",

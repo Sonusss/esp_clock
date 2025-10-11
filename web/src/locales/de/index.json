@@ -25,6 +25,8 @@
     "time": "Zeit",
     "day": "Tag",
     "night": "Nacht",
+    "hue": "Farbton",
+    "brightness": "Helligkeit",
     "restart_required": "Neustart erforderlich",
     "colorconfig": {
         "title": "Farbeinstellungen",

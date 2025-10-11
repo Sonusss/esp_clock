@@ -1,4 +1,7 @@
 #include "config.hpp"
+#include <algorithm>
+#include <cmath>
+#include <cstring>
 
 #if defined(ESP8266)
 #define MAXPINS 16
@@ -16,6 +19,101 @@ uint32_t _clampInt(uint32_t val, uint32_t min, uint32_t max)
         return t > max ? max : t;
 }
 
+static uint8_t _hexToByte(char hi, char lo)
+{
+        auto hexToInt = [](char c) -> int {
+                if (c >= '0' && c <= '9')
+                        return c - '0';
+                if (c >= 'A' && c <= 'F')
+                        return c - 'A' + 10;
+                if (c >= 'a' && c <= 'f')
+                        return c - 'a' + 10;
+                return 0;
+        };
+
+        return static_cast<uint8_t>((hexToInt(hi) << 4) | hexToInt(lo));
+}
+
+static ColorSetting _colorFromLegacyHex(const char *value, uint16_t defaultHue, uint8_t defaultBrightness)
+{
+        ColorSetting color{defaultHue, defaultBrightness};
+        if (value == nullptr)
+        {
+                return color;
+        }
+
+        size_t len = strlen(value);
+        if (len != 7 || value[0] != '#')
+        {
+                return color;
+        }
+
+        uint8_t r = _hexToByte(value[1], value[2]);
+        uint8_t g = _hexToByte(value[3], value[4]);
+        uint8_t b = _hexToByte(value[5], value[6]);
+
+        float rf = static_cast<float>(r) / 255.0f;
+        float gf = static_cast<float>(g) / 255.0f;
+        float bf = static_cast<float>(b) / 255.0f;
+
+        float maxVal = std::max(rf, std::max(gf, bf));
+        float minVal = std::min(rf, std::min(gf, bf));
+        float delta = maxVal - minVal;
+
+        float hue = 0.0f;
+        if (delta != 0.0f)
+        {
+                if (maxVal == rf)
+                {
+                        hue = 60.0f * ((gf - bf) / delta);
+                        if (hue < 0.0f)
+                        {
+                                hue += 360.0f;
+                        }
+                }
+                else if (maxVal == gf)
+                {
+                        hue = 60.0f * (((bf - rf) / delta) + 2.0f);
+                }
+                else
+                {
+                        hue = 60.0f * (((rf - gf) / delta) + 4.0f);
+                }
+        }
+
+        float brightness = maxVal * 100.0f;
+
+        color.hue = static_cast<uint16_t>(_clampInt(static_cast<uint32_t>(std::roundf(hue)), 0, 360));
+        color.brightness = static_cast<uint8_t>(_clampInt(static_cast<uint32_t>(std::roundf(brightness)), 0, 100));
+        return color;
+}
+
+static ColorSetting _parseColorSetting(JsonVariantConst variant, uint16_t defaultHue, uint8_t defaultBrightness)
+{
+        ColorSetting color{defaultHue, defaultBrightness};
+
+        if (variant.is<JsonObjectConst>())
+        {
+                color.hue = static_cast<uint16_t>(_clampInt(static_cast<uint32_t>(variant["hue"] | defaultHue), 0, 360));
+                color.brightness = static_cast<uint8_t>(_clampInt(static_cast<uint32_t>(variant["brightness"] | defaultBrightness), 0, 100));
+                return color;
+        }
+
+        if (variant.is<const char *>())
+        {
+                return _colorFromLegacyHex(variant.as<const char *>(), defaultHue, defaultBrightness);
+        }
+
+        return color;
+}
+
+static void _colorSettingToJson(JsonDocument &doc, const char *name, const ColorSetting &color)
+{
+        JsonObject obj = doc.createNestedObject(name);
+        obj["hue"] = color.hue;
+        obj["brightness"] = color.brightness;
+}
+
 void Config::configToJSON(JsonDocument &doc, bool skipSensitiveData)
 {
         Config::locked = true;
@@ -26,33 +124,33 @@ void Config::configToJSON(JsonDocument &doc, bool skipSensitiveData)
                 doc["timezone"] = config.timezone;
         }
 
-        doc["hourColor"] = config.hourColor;
-        doc["minuteColor"] = config.minuteColor;
-        doc["secondColor"] = config.secondColor;
+        _colorSettingToJson(doc, "hourColor", config.hourColor);
+        _colorSettingToJson(doc, "minuteColor", config.minuteColor);
+        _colorSettingToJson(doc, "secondColor", config.secondColor);
 
-        doc["hourColorDimmed"] = config.hourColorDimmed;
-        doc["minuteColorDimmed"] = config.minuteColorDimmed;
-        doc["secondColorDimmed"] = config.secondColorDimmed;
+        _colorSettingToJson(doc, "hourColorDimmed", config.hourColorDimmed);
+        _colorSettingToJson(doc, "minuteColorDimmed", config.minuteColorDimmed);
+        _colorSettingToJson(doc, "secondColorDimmed", config.secondColorDimmed);
 
         doc["hourDot"] = config.hourDot;
         doc["hourSegment"] = config.hourSegment;
         doc["hourQuarter"] = config.hourQuarter;
 
-        doc["hourDotColor"] = config.hourDotColor;
-        doc["hourSegmentColor"] = config.hourSegmentColor;
-        doc["hourQuarterColor"] = config.hourQuarterColor;
+        _colorSettingToJson(doc, "hourDotColor", config.hourDotColor);
+        _colorSettingToJson(doc, "hourSegmentColor", config.hourSegmentColor);
+        _colorSettingToJson(doc, "hourQuarterColor", config.hourQuarterColor);
 
-        doc["hourDotColorDimmed"] = config.hourDotColorDimmed;
-        doc["hourSegmentColorDimmed"] = config.hourSegmentColorDimmed;
-        doc["hourQuarterColorDimmed"] = config.hourQuarterColorDimmed;
+        _colorSettingToJson(doc, "hourDotColorDimmed", config.hourDotColorDimmed);
+        _colorSettingToJson(doc, "hourSegmentColorDimmed", config.hourSegmentColorDimmed);
+        _colorSettingToJson(doc, "hourQuarterColorDimmed", config.hourQuarterColorDimmed);
 
         doc["dayMonth"] = config.dayMonth;
-        doc["dayColor"] = config.dayColor;
-        doc["monthColor"] = config.monthColor;
-        doc["weekdayColor"] = config.weekdayColor;
-        doc["dayColorDimmed"] = config.dayColorDimmed;
-        doc["monthColorDimmed"] = config.monthColorDimmed;
-        doc["weekdayColorDimmed"] = config.weekdayColorDimmed;
+        _colorSettingToJson(doc, "dayColor", config.dayColor);
+        _colorSettingToJson(doc, "monthColor", config.monthColor);
+        _colorSettingToJson(doc, "weekdayColor", config.weekdayColor);
+        _colorSettingToJson(doc, "dayColorDimmed", config.dayColorDimmed);
+        _colorSettingToJson(doc, "monthColorDimmed", config.monthColorDimmed);
+        _colorSettingToJson(doc, "weekdayColorDimmed", config.weekdayColorDimmed);
         doc["monthOffset"] = config.monthOffset + 1;
         doc["dayOffset"] = config.dayOffset + 1;
         doc["weekdayOffset"] = config.weekdayOffset + 1;
@@ -75,8 +173,8 @@ void Config::configToJSON(JsonDocument &doc, bool skipSensitiveData)
         doc["bgLight"] = config.bgLight;
         doc["bgLedPin"] = config.bgLedPin;
         doc["bgLedCount"] = config.bgLedCount;
-        doc["bgColor"] = config.bgColor;
-        doc["bgColorDimmed"] = config.bgColorDimmed;
+        _colorSettingToJson(doc, "bgColor", config.bgColor);
+        _colorSettingToJson(doc, "bgColorDimmed", config.bgColorDimmed);
 
         doc["language"] = config.language;
 
@@ -125,25 +223,13 @@ bool Config::JSONToConfig(JsonDocument &doc, bool skipSensitiveData)
                 doc["timezone"] | "Europe/Berlin",
                 sizeof(config.timezone));
 
-        strlcpy(config.hourColor,
-                doc["hourColor"] | "#FF0000",
-                sizeof(config.hourColor));
-        strlcpy(config.minuteColor,
-                doc["minuteColor"] | "#00FF00",
-                sizeof(config.minuteColor));
-        strlcpy(config.secondColor,
-                doc["secondColor"] | "#0000FF",
-                sizeof(config.secondColor));
+        config.hourColor = _parseColorSetting(doc["hourColor"], 0, 100);
+        config.minuteColor = _parseColorSetting(doc["minuteColor"], 120, 100);
+        config.secondColor = _parseColorSetting(doc["secondColor"], 240, 100);
 
-        strlcpy(config.hourColorDimmed,
-                doc["hourColorDimmed"] | "#770000",
-                sizeof(config.hourColorDimmed));
-        strlcpy(config.minuteColorDimmed,
-                doc["minuteColorDimmed"] | "#007700",
-                sizeof(config.minuteColorDimmed));
-        strlcpy(config.secondColorDimmed,
-                doc["secondColorDimmed"] | "#000077",
-                sizeof(config.secondColorDimmed));
+        config.hourColorDimmed = _parseColorSetting(doc["hourColorDimmed"], 0, 47);
+        config.minuteColorDimmed = _parseColorSetting(doc["minuteColorDimmed"], 120, 47);
+        config.secondColorDimmed = _parseColorSetting(doc["secondColorDimmed"], 240, 47);
 
         strlcpy(config.hourHandStyle,
                 doc["hourHandStyle"] | "simple",
@@ -152,46 +238,22 @@ bool Config::JSONToConfig(JsonDocument &doc, bool skipSensitiveData)
         config.hourSegment = doc["hourSegment"] | false;
         config.hourQuarter = doc["hourQuarter"] | false;
 
-        strlcpy(config.hourDotColor,
-                doc["hourDotColor"] | "#010101",
-                sizeof(config.hourDotColor));
-        strlcpy(config.hourSegmentColor,
-                doc["hourSegmentColor"] | "#010000",
-                sizeof(config.hourSegmentColor));
-        strlcpy(config.hourQuarterColor,
-                doc["hourQuarterColor"] | "#000001",
-                sizeof(config.hourQuarterColor));
+        config.hourDotColor = _parseColorSetting(doc["hourDotColor"], 0, 0);
+        config.hourSegmentColor = _parseColorSetting(doc["hourSegmentColor"], 0, 0);
+        config.hourQuarterColor = _parseColorSetting(doc["hourQuarterColor"], 240, 0);
 
-        strlcpy(config.hourDotColorDimmed,
-                doc["hourDotColorDimmed"] | "#000000",
-                sizeof(config.hourDotColorDimmed));
-        strlcpy(config.hourSegmentColorDimmed,
-                doc["hourSegmentColorDimmed"] | "#000000",
-                sizeof(config.hourSegmentColorDimmed));
-        strlcpy(config.hourQuarterColorDimmed,
-                doc["hourQuarterColorDimmed"] | "#000000",
-                sizeof(config.hourQuarterColorDimmed));
+        config.hourDotColorDimmed = _parseColorSetting(doc["hourDotColorDimmed"], 0, 0);
+        config.hourSegmentColorDimmed = _parseColorSetting(doc["hourSegmentColorDimmed"], 0, 0);
+        config.hourQuarterColorDimmed = _parseColorSetting(doc["hourQuarterColorDimmed"], 0, 0);
 
         config.dayMonth = doc["dayMonth"] | false;
-        strlcpy(config.dayColor,
-                doc["dayColor"] | "#FF00CE",
-                sizeof(config.dayColor));
-        strlcpy(config.monthColor,
-                doc["monthColor"] | "#FFFA00",
-                sizeof(config.monthColor));
-        strlcpy(config.weekdayColor,
-                doc["weekdayColor"] | "#00FFC7",
-                sizeof(config.weekdayColor));
+        config.dayColor = _parseColorSetting(doc["dayColor"], 312, 100);
+        config.monthColor = _parseColorSetting(doc["monthColor"], 59, 100);
+        config.weekdayColor = _parseColorSetting(doc["weekdayColor"], 167, 100);
 
-        strlcpy(config.dayColorDimmed,
-                doc["dayColorDimmed"] | "#7B0063",
-                sizeof(config.dayColorDimmed));
-        strlcpy(config.monthColorDimmed,
-                doc["monthColorDimmed"] | "#575500",
-                sizeof(config.monthColorDimmed));
-        strlcpy(config.weekdayColorDimmed,
-                doc["weekdayColorDimmed"] | "#00755B",
-                sizeof(config.weekdayColorDimmed));
+        config.dayColorDimmed = _parseColorSetting(doc["dayColorDimmed"], 312, 48);
+        config.monthColorDimmed = _parseColorSetting(doc["monthColorDimmed"], 59, 34);
+        config.weekdayColorDimmed = _parseColorSetting(doc["weekdayColorDimmed"], 167, 46);
 
         config.nightTimeBegins = doc["nightTimeBegins"] | 1320;
         config.nightTimeBegins = _clampInt(config.nightTimeBegins, 0, 1440);
@@ -207,12 +269,8 @@ bool Config::JSONToConfig(JsonDocument &doc, bool skipSensitiveData)
         config.alarmTime = doc["alarmTime"] | 480;
 
         config.bgLight = doc["bgLight"] | false;
-        strlcpy(config.bgColor,
-                doc["bgColor"] | "#000000",
-                sizeof(config.bgColor));
-        strlcpy(config.bgColorDimmed,
-                doc["bgColorDimmed"] | "#000000",
-                sizeof(config.bgColorDimmed));
+        config.bgColor = _parseColorSetting(doc["bgColor"], 0, 0);
+        config.bgColorDimmed = _parseColorSetting(doc["bgColorDimmed"], 0, 0);
 
 #if defined(BITBANG_MODE) || defined(DEBUG_BUILD) || defined(ESP32)
         config.bgLedPin = doc["bgLedPin"] | 15;

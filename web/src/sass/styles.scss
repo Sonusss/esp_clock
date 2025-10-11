@@ -131,3 +131,25 @@ time {
 form {
     margin-bottom: 3rem;
 }
+
+.slider-control {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
+
+    .form-label {
+        flex: 0 0 5rem;
+        margin-bottom: 0;
+    }
+
+    input[type="range"] {
+        flex: 1 1 auto;
+    }
+
+    .slider-value {
+        width: 3rem;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+}

@@ -8,43 +8,49 @@
 #include <SPIFFS.h>
 #endif
 
+struct ColorSetting
+{
+    uint16_t hue;
+    uint8_t brightness;
+};
+
 struct ConfigData
 {
     char hostname[64];
     char timeserver[64];
     char timezone[64];
 
-    char hourColor[8];
-    char minuteColor[8];
-    char secondColor[8];
+    ColorSetting hourColor;
+    ColorSetting minuteColor;
+    ColorSetting secondColor;
 
-    char hourColorDimmed[8];
-    char minuteColorDimmed[8];
-    char secondColorDimmed[8];
+    ColorSetting hourColorDimmed;
+    ColorSetting minuteColorDimmed;
+    ColorSetting secondColorDimmed;
 
     bool hourDot;
     bool hourSegment;
     bool hourQuarter;
 
-    char hourDotColor[8];
-    char hourSegmentColor[8];
-    char hourQuarterColor[8];
-    char hourDotColorDimmed[8];
-    char hourSegmentColorDimmed[8];
-    char hourQuarterColorDimmed[8];
+    ColorSetting hourDotColor;
+    ColorSetting hourSegmentColor;
+    ColorSetting hourQuarterColor;
+    ColorSetting hourDotColorDimmed;
+    ColorSetting hourSegmentColorDimmed;
+    ColorSetting hourQuarterColorDimmed;
 
     bool dayMonth;
     uint32_t monthOffset;
     uint32_t dayOffset;
     uint32_t weekdayOffset;
 
-    char monthColor[8];
-    char dayColor[8];
-    char weekdayColor[8];
+    ColorSetting monthColor;
+    ColorSetting dayColor;
+    ColorSetting weekdayColor;
 
-    char monthColorDimmed[8];
-    char dayColorDimmed[8];
-    char weekdayColorDimmed[8];
+    ColorSetting monthColorDimmed;
+    ColorSetting dayColorDimmed;
+    ColorSetting weekdayColorDimmed;
 
     uint16_t nightTimeBegins;
     uint16_t nightTimeEnds;
@@ -58,8 +64,8 @@ struct ConfigData
     uint32_t alarmTime;
 
     bool bgLight;
-    char bgColor[8];
-    char bgColorDimmed[8];
+    ColorSetting bgColor;
+    ColorSetting bgColorDimmed;
     uint32_t bgLedPin;
     uint32_t bgLedCount;
 
