@@ -1,11 +1,11 @@
 mixin colorRanges(idPrefix, binding)
-    .slider-control
+    .slider-control.slider-hue(data-label='${{ index.hue }}$')
         label.form-label(for=idPrefix + '-hue') ${{ index.hue }}$
-        input.form-input(type='range', id=idPrefix + '-hue', min='0', max='360', step='1', rv-value=binding + '.hue | int')
+        input.form-input.hue-slider(type='range', id=idPrefix + '-hue', min='0', max='360', step='1', rv-value=binding + '.hue | int')
         span.slider-value(rv-text=binding + '.hue')
-    .slider-control
+    .slider-control.slider-brightness(data-label='${{ index.brightness }}$')
         label.form-label(for=idPrefix + '-brightness') ${{ index.brightness }}$
-        input.form-input(type='range', id=idPrefix + '-brightness', min='0', max='100', step='1', rv-value=binding + '.brightness | int')
+        input.form-input.brightness-slider(type='range', id=idPrefix + '-brightness', min='0', max='100', step='1', rv-value=binding + '.brightness | int')
         span.slider-value(rv-text=binding + '.brightness')
 
 .contenttab#colorconfig
