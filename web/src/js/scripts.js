@@ -163,6 +163,16 @@ function initHueBrightnessGroup(colorInput, hueSlider, brightnessSlider) {
     let saturation = 1;
     let isInternalUpdate = false;
 
+    function setHueSliderTrack(hue) {
+        const min = parseFloat(hueSlider.min) || 0;
+        const max = parseFloat(hueSlider.max) || 360;
+        const normalizedHue = ((hue % 360) + 360) % 360;
+        const percentage = clamp((normalizedHue - min) / (max - min), 0, 1) * 100;
+        const hueColor = hsvToHex(normalizedHue, 1, 1) || '#ff0000';
+        const trackBackground = "linear-gradient(90deg, " + hueColor + " 0%, " + hueColor + " " + percentage + "%, #d8d8d8 " + percentage + "%, #d8d8d8 100%)";
+        hueSlider.style.setProperty('--slider-track-bg', trackBackground);
+    }
+
     function updateSliders(hexColor) {
         const hsv = hexToHsv(hexColor);
         if (!hsv) {
@@ -171,12 +181,15 @@ function initHueBrightnessGroup(colorInput, hueSlider, brightnessSlider) {
         saturation = hsv.s;
         hueSlider.value = Math.round(hsv.h);
         brightnessSlider.value = Math.round(hsv.v * 100);
+        setHueSliderTrack(hsv.h);
     }
 
     function updateColorFromSliders() {
         const hue = parseFloat(hueSlider.value) || 0;
         const brightness = clamp(parseFloat(brightnessSlider.value) / 100, 0, 1);
         const hexColor = hsvToHex(hue, saturation, brightness);
+
+        setHueSliderTrack(hue);
 
         if (!hexColor || colorInput.value.toLowerCase() === hexColor) {
             return;

@@ -13,6 +13,7 @@ function reload(done) {
     connect.server({
         livereload: true,
         port: 8080,
+        host: '0.0.0.0',
         root: 'dist'
     });
     done();
